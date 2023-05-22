@@ -17,11 +17,6 @@ class AdminController extends ResourceController
      */
     public function index()
     {
-        return view('admin/index');
-    }
-
-    public function designer()
-    {
         $db = \Config\Database::connect();
 
         $data = [
@@ -36,6 +31,50 @@ class AdminController extends ResourceController
         }
 
         return $this->respond($data, 200);
+    }
+
+    public function dashboard()
+    {
+        $data = [
+            'title' => "Admin | Antrian Printing"
+        ];
+
+        echo view('component/headeradmin', $data);
+        echo view('admin/index');
+        echo view('component/footeradmin');
+    }
+
+    public function muser()
+    {
+        $data = [
+            'title' => "Master User | Antrian Printing"
+        ];
+
+        echo view('component/headeradmin', $data);
+        echo view('admin/masteruser');
+        echo view('component/footeradmin');
+    }
+
+    public function mantrian()
+    {
+        $data = [
+            'title' => "Master Antrian | Antrian Printing"
+        ];
+
+        echo view('component/headeradmin', $data);
+        echo view('admin/masterantrian');
+        echo view('component/footeradmin');
+    }
+
+    public function profil()
+    {
+        $data = [
+            'title' => "Profil | Antrian Printing"
+        ];
+
+        echo view('component/headeradmin', $data);
+        echo view('admin/profil');
+        echo view('component/footeradmin');
     }
 
     /**

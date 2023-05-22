@@ -1,4 +1,0 @@
----
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/antrianp/public_html/

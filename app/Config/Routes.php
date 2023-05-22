@@ -11,9 +11,10 @@ $routes = Services::routes();
  * --------------------------------------------------------------------
  */
 $routes->setDefaultNamespace('App\Controllers');
-$routes->setDefaultController('Home');
+$routes->setDefaultController('LoginController');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
+$routes->setAutoRoute(true);
 $routes->set404Override();
 // The Auto Routing (Legacy) is very dangerous. It is easy to create vulnerable apps
 // where controller filters or CSRF protection are bypassed.
@@ -30,13 +31,11 @@ $routes->set404Override();
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 
-$routes->get('/', 'AdminController::index');
 
-$routes->resource('user', ['controller' => 'UserController']);
-$routes->resource('admin', ['controller' => 'AdminController']);
-
-$routes->post('login', 'LoginController::index');
+// Route Rest API
+$routes->post('login', 'LoginController::signin');
 $routes->post('register', 'UserController::create');
+$routes->post('check-user', 'UserController::search');
 
 $routes->get('get-layanan', 'LayananController::index');
 $routes->post('create-layanan', 'LayananController::create');
@@ -47,13 +46,32 @@ $routes->post('create-jambooking', 'WaktuBookingController::create');
 $routes->get('get-jamselesai', 'WaktuSelesaiController::index');
 $routes->post('create-jamselesai', 'WaktuSelesaiController::create');
 
-$routes->get('get-designer', 'AdminController::designer');
+$routes->get('get-designer', 'AdminController::index');
 
 $routes->get('get-antrian', 'AntrianController::index');
 $routes->post('create-antrian', 'AntrianController::create');
 $routes->post('check-antrian', 'AntrianController::check');
 $routes->get('get-antrian/(:num)', 'AntrianController::show/$1');
 $routes->get('get-riwayat/(:num)', 'AntrianController::riwayat/$1');
+
+// Route Web Service
+$routes->get('login', 'LoginController::index');
+
+$routes->get('logout', 'LoginController::logout');
+
+$routes->get('antrian', 'Home::antrian');
+$routes->get('tentang', 'Home::tentang');
+
+$routes->get('dashboard', 'AdminController::dashboard');
+$routes->get('dashboard/profil', 'AdminController::profil');
+$routes->get('dashboard/master-user', 'AdminController::muser');
+$routes->get('dashboard/master-antrian', 'AdminController::mantrian');
+
+// Sweet Alerts
+$routes->get('notification', 'MessageController::showSweetAlertMessages');
+
+$routes->resource('user', ['controller' => 'UserController']);
+$routes->resource('admin', ['controller' => 'AdminController']);
 
 /*
  * --------------------------------------------------------------------

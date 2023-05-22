@@ -48,6 +48,48 @@ class UserController extends ResourceController
         
         return $this->respond($data, 200);
     }
+
+    public function search()
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('user');
+
+        $phone = esc($this->request->getVar('phone_user'));
+        $email = esc($this->request->getVar('email_user'));
+        
+        helper(['form']);
+        $rules = $this->validate([
+            'phone_user'    => 'required|is_unique[user.phone_user]|numeric|min_length[10]|max_length[13]',
+            'email_user'    => 'required|valid_email|is_unique[user.email_user]',
+        ]);
+
+        if (!$rules) {
+            $check_arr = array(
+                'phone_user' => $phone,
+                'email_user' => $email
+            );
+
+            $query   = $db->query("SELECT id, username, nama_lengkap, alamat, jenis_kelamin, tempat_lahir, tanggal_lahir, 
+            status, phone_user, email_user FROM user WHERE phone_user = '$phone' OR email_user = '$email'");
+
+            $results = $query->getResult();
+            
+            $data = [
+                'status' => true,
+                'code' => 400,
+                'message' => 'No Handphone atau Email sudah terdaftar',
+                'data' =>  $results
+            ];
+        } else {
+            $data = [
+                'status' => true,
+                'code' => 200,
+                'message' => 'Data User belum terdaftar'
+            ];
+        }
+        
+        return $this->respond($data, 200);
+    }
     
     /**
     * Create a new resource object, from "posted" parameters
@@ -56,6 +98,9 @@ class UserController extends ResourceController
     */
     public function create()
     {
+        $db = \Config\Database::connect();
+        $builder = $db->table('user');
+        
         date_default_timezone_set('Asia/Jakarta');
         $date_now = date('Y-m-d H:i:s');
 
@@ -63,13 +108,8 @@ class UserController extends ResourceController
         $rules = $this->validate([
             'username'      => 'required|min_length[5]|max_length[10]',
             'nama_lengkap'  => 'required|max_length[35]',
-            'alamat'        => 'required',
-            'jenis_kelamin' => 'required',
-            'tempat_lahir'  => 'required',
-            'tanggal_lahir' => 'required',
             'password'      => 'required|min_length[8]',
             'conf_password' => 'matches[password]',
-            'status'        => 'required',
             'phone_user'    => 'required|is_unique[user.phone_user]|numeric|min_length[10]|max_length[13]',
             'email_user'    => 'required|valid_email|is_unique[user.email_user]',
         ]);
@@ -97,10 +137,14 @@ class UserController extends ResourceController
             'updated_at'    => $date_now,
         ]);
 
+        $insert_id = $db->insertID();
+        $data_find = $this->model->where('id', $insert_id)->first();
+
         $response = [
             'status' => true,
             'code' => 200,
-            'message' => 'Data User Berhasil Ditambahkan'
+            'message' => 'Data User Berhasil Ditambahkan',
+            'data' => $data_find
         ];
 
         return $this->respondCreated($response);
@@ -120,10 +164,6 @@ class UserController extends ResourceController
         $rules = $this->validate([
             'username'      => 'required|min_length[5]|max_length[10]',
             'nama_lengkap'  => 'required|max_length[35]',
-            'alamat'        => 'required',
-            'jenis_kelamin' => 'required',
-            'tempat_lahir'  => 'required',
-            'tanggal_lahir' => 'required',
             'password'      => 'required|min_length[8]',
             'phone_user'    => 'required|numeric|min_length[10]|max_length[13]',
             'email_user'    => 'required|valid_email',
