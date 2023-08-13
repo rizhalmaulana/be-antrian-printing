@@ -48,27 +48,33 @@ $routes->post('create-jamselesai', 'WaktuSelesaiController::create');
 
 $routes->get('get-designer', 'AdminController::index');
 
+$routes->get('send-push-notification', 'AntrianController::send_push_notification');
+
 $routes->get('get-antrian', 'AntrianController::index');
 $routes->post('create-antrian', 'AntrianController::create');
 $routes->post('check-antrian', 'AntrianController::check');
+$routes->put('cancel-antrian/(:num)', 'AntrianController::update/$1');
+$routes->put('verifikasi-antrian/(:num)', 'AntrianController::verifikasi/$1');
 $routes->get('get-antrian/(:num)', 'AntrianController::show/$1');
 $routes->get('get-riwayat/(:num)', 'AntrianController::riwayat/$1');
 
+$routes->post('push-notification', 'AntrianController::notification');
+
 // Route Web Service
 $routes->get('login', 'LoginController::index');
-
 $routes->get('logout', 'LoginController::logout');
 
 $routes->get('antrian', 'Home::antrian');
 $routes->get('tentang', 'Home::tentang');
 
 $routes->get('dashboard', 'AdminController::dashboard');
+$routes->get('dashboard/edit/(:num)', 'AdminController::edit/$1');
+$routes->post('dashboard/updateuser/(:num)', 'AdminController::updateuser/$1');
+$routes->post('dashboard/updateadmin/(:num)', 'AdminController::updateadmin/$1');
 $routes->get('dashboard/profil', 'AdminController::profil');
+$routes->get('dashboard/logout', 'AdminController::logout');
 $routes->get('dashboard/master-user', 'AdminController::muser');
 $routes->get('dashboard/master-antrian', 'AdminController::mantrian');
-
-// Sweet Alerts
-$routes->get('notification', 'MessageController::showSweetAlertMessages');
 
 $routes->resource('user', ['controller' => 'UserController']);
 $routes->resource('admin', ['controller' => 'AdminController']);
