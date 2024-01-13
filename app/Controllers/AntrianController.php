@@ -649,6 +649,71 @@ class AntrianController extends ResourceController
     }
 
     /**
+     * Update untuk FCM Token user
+    */
+    public function updatefcmtoken()
+    {
+        $db = \Config\Database::connect();
+
+        date_default_timezone_set('Asia/Jakarta');
+        $date_now = date('Y-m-d H:i:s');
+
+        $request_id_user    = $this->request->getVar('id_user');
+        $request_fcm_token  = $this->request->getVar('fcm_token');
+        
+        $builder_user = $db->table('user');
+        $builder_user->where('id', $request_id_user);
+
+        $result_update = $builder_user->update([
+            'fcm_token'     => $request_fcm_token,
+            'updated_at'    => $date_now,
+        ]);
+
+        if ($result_update > 0) {
+            $response = [
+                'status' => true,
+                'code' => 200,
+                'message' => 'User FCM Token Berhasil Update'
+            ];
+            
+            return $this->respond($response, 200); 
+        } else {
+            $response = [
+                'status' => false,
+                'code' => 400,
+                'message' => 'User FCM Token Gagal Update'
+            ];
+            
+            return $this->respond($response, 200);
+        } 
+    }
+
+
+    /**
+     * Fitur pengingat untuk user
+    */
+    public function remindernotification($id = null)
+    {
+        $serverKey = 'AAAAkhtk95E:APA91bEUyQ9pj_fYdXy_FsWO8QN6weFZB78SKWDlC3EF4mtO1qCWPl6Ol7A8gZOrHrhva_7DMsPssgXI7k2aFgLGzpfUhYJ3z9MP-axkYXA3I82LYtq_lHydsUYvOhQuuqyvoAoT5rkt'; // Replace with your Firebase Cloud Messaging Server Key
+        $fcmEndpoint = 'https://fcm.googleapis.com/fcm/send';
+
+        $message = [
+            'title' => 'Informasi Antrian',
+            'body' => 'Hallo pengguna AntrianPrinting, anda masih memiliki antrian yang sedang berjalan. Silahkan cek antrian anda disini!',
+        ];
+
+        $registrationToken = 'FCM_TOKEN_OF_TARGET_DEVICE'; // Replace with the FCM token of the target Android device
+
+        $data = [
+            'notification' => $message,
+            'to' => $registrationToken,
+        ];
+
+        $client = new Client();
+    }
+
+
+    /**
     * Return a new resource object, with default properties
     *
     * @return mixed

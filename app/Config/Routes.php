@@ -54,6 +54,8 @@ $routes->get('get-antrian', 'AntrianController::index');
 $routes->post('create-antrian', 'AntrianController::create');
 $routes->post('check-antrian', 'AntrianController::check');
 $routes->put('cancel-antrian/(:num)', 'AntrianController::update/$1');
+$routes->put('reminder-antrian/(:num)', 'AntrianController::reminder/$1');
+$routes->post('update-fcm', 'AntrianController::updatefcmtoken');
 $routes->put('verifikasi-antrian/(:num)', 'AntrianController::verifikasi/$1');
 $routes->get('get-antrian/(:num)', 'AntrianController::show/$1');
 $routes->get('get-riwayat/(:num)', 'AntrianController::riwayat/$1');

@@ -38,10 +38,11 @@ class AdminController extends ResourceController
     {
         $db = \Config\Database::connect();
         $antrian = $db->table('antrian');
+        $nama = session()->get("nama_designer");
 
         $cek_status_batal         = $antrian->where('status', 'Batal')->countAllResults();
         $cek_status_berjalan      = $antrian->where('status', 'Menunggu')->countAllResults();
-        $cek_status_berhasil      = $antrian->where('status', 'Berhasil')->countAllResults();
+        $cek_status_berhasil      = $antrian->where(array('status' => 'Berhasil', 'nama_designer' => $nama))->countAllResults();
 
         $total_semua_antrian      = $cek_status_batal + $cek_status_berhasil + $cek_status_berjalan;
 

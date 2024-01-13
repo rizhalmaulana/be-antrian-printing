@@ -155,6 +155,9 @@
                                             <a id="verifikasi-click" value="<?= $row->id; ?>" class="btn btn-success">
                                                 Verifikasi
                                             </a>
+                                            <a id="reminder-click" value="<?= $row->id_user; ?>" class="btn btn-info">
+                                                Ingatkan
+                                            </a>
                                             <a id="cancel-click" value="<?= $row->id; ?>" class="btn btn-danger">
                                                 Batal
                                             </a>

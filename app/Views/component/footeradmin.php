@@ -155,6 +155,53 @@ new Chart(ctx1, {
     $(document).ready(function(){
         var idAntrian = $("#id_antrian").val();
         
+        $("#reminder-click").click(function(){
+            Swal.fire({
+                    title: 'Informasi!',
+                    text: "Apa anda yakin ingin mengingatkan antrian ini ke user?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    cancelButtonText: 'Kembali',
+                    confirmButtonText: 'Ya, Ingatkan!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "<?= base_url('cancel-antrian/'); ?>" + idAntrian,
+                            type: "PUT",
+                            dataType: "JSON",
+                            success: function(response) {
+                                if (response.status) {
+                                    Swal.fire(
+                                        'Antrian Di Cancel!',
+                                        'Antrian sudah berhasil dicancel.',
+                                        'success'
+                                    )
+                                } else {
+                                    Swal.fire(
+                                        'Informasi!',
+                                        'Antrian gagal dicancel.',
+                                        'warning'
+                                    )
+                                }
+                            },
+                            error: function() {
+                                Swal.fire(
+                                    'Informasi!',
+                                    'Antrian gagal dicancel.',
+                                    'warning'
+                                )
+                            }
+                        });
+                    }
+                });
+        });
+    });
+
+    $(document).ready(function(){
+        var idAntrian = $("#id_antrian").val();
+        
         $("#cancel-click").click(function(){
             Swal.fire({
                     title: 'Informasi!',

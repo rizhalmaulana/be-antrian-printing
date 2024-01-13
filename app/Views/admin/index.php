@@ -90,7 +90,7 @@
                         <div class="row">
                             <div class="col-8">
                                 <div class="numbers">
-                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Antrian Berhasil</p>
+                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Antrian Terkonfirmasi</p>
                                     <h5 class="font-weight-bolder">
                                         <?= $total_berhasil; ?>
                                     </h5>
@@ -116,7 +116,7 @@
                         <div class="row">
                             <div class="col-8">
                                 <div class="numbers">
-                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Antrian Berjalan</p>
+                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Antrian Berjalan</p>
                                     <h5 class="font-weight-bolder">
                                         <?= $total_berjalan; ?>
                                     </h5>
@@ -142,7 +142,7 @@
                         <div class="row">
                             <div class="col-8">
                                 <div class="numbers">
-                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Antrian Gagal</p>
+                                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Antrian Gagal</p>
                                     <h5 class="font-weight-bolder">
                                         <?= $total_batal; ?>
                                     </h5>
