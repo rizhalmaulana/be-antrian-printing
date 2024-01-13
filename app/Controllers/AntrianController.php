@@ -163,12 +163,26 @@ class AntrianController extends ResourceController
             'status' => "Menunggu"
         );
 
+        $array_booking_with_status = array(
+            'tgl_pesanan' => $request_tgl, 
+            'jam_booking' => $request_jam_book, 
+            'jam_selesai' => $request_jam_selesai,
+            'status' => "Batal"
+        );
+
+        $array_cek_designer_booking = array(
+            'nama_designer' => $request_designer, 
+            'status' => "Menunggu",
+        );
+
         // Cek data di builder table antrian 
         $cek_date_booking       = $builder->where($array_date_book)->countAllResults();
         $cek_user_booking       = $builder->where($array_where_user_booking)->countAllResults();
-        $cek_designer_booking   = $builder->where('nama_designer', $request_designer)->countAllResults();
+        $cek_designer_booking   = $builder->where($array_cek_designer_booking)->countAllResults();
         $cek_waktu_booking      = $builder->where('jam_booking', $request_jam_book)->countAllResults();
         $cek_waktu_selesai      = $builder->where('jam_selesai', $request_jam_selesai)->countAllResults();
+
+        $is_status_booking_batal= $builder->where($array_booking_with_status)->countAllResults();
         
         $from_time      = strtotime($time_now); 
         $to_time_book   = strtotime($request_jam_book);
@@ -261,21 +275,11 @@ class AntrianController extends ResourceController
                         
                         return $this->respond($response, 200);
                         
-                    } 
-                    else if ($cek_waktu_booking > 0) {
+                    } else if ($is_status_booking_batal < 0) {
                         $response = [
                             'status' => false,
                             'code' => 400,
                             'message' => 'Waktu booking sudah terisi, silahkan pilih opsi lain.'
-                        ];
-                        
-                        return $this->respond($response, 200);
-                        
-                    } else if ($cek_waktu_selesai > 0) {
-                        $response = [
-                            'status' => false,
-                            'code' => 400,
-                            'message' => 'Waktu selesai sudah terisi, silahkan pilih opsi lain.'
                         ];
                         
                         return $this->respond($response, 200);
@@ -429,7 +433,6 @@ class AntrianController extends ResourceController
                 } else {
                     $messageTime = ($divideTime%3600) / 60;
                     $result_push = $this->send_push_notification("Notifikasi Antrian", "Kamu punya waktu ". $messageTime ." Menit untuk konfirmasi, Pantau terus antrian kamu disini.");
-
                 }
 
                 if ($result_push != null) {
@@ -694,22 +697,28 @@ class AntrianController extends ResourceController
     */
     public function remindernotification($id = null)
     {
-        $serverKey = 'AAAAkhtk95E:APA91bEUyQ9pj_fYdXy_FsWO8QN6weFZB78SKWDlC3EF4mtO1qCWPl6Ol7A8gZOrHrhva_7DMsPssgXI7k2aFgLGzpfUhYJ3z9MP-axkYXA3I82LYtq_lHydsUYvOhQuuqyvoAoT5rkt'; // Replace with your Firebase Cloud Messaging Server Key
-        $fcmEndpoint = 'https://fcm.googleapis.com/fcm/send';
+        $title      = "Pengingat Antrian";
+        $message    = "Haay! Kamu diingatkan admin untuk cek antrian kamu.";
 
-        $message = [
-            'title' => 'Informasi Antrian',
-            'body' => 'Hallo pengguna AntrianPrinting, anda masih memiliki antrian yang sedang berjalan. Silahkan cek antrian anda disini!',
-        ];
+        $result_push = $this->send_push_notification($title, $message);
 
-        $registrationToken = 'FCM_TOKEN_OF_TARGET_DEVICE'; // Replace with the FCM token of the target Android device
-
-        $data = [
-            'notification' => $message,
-            'to' => $registrationToken,
-        ];
-
-        $client = new Client();
+        if ($result_push != null) {
+            $response = [
+                'status' => true,
+                'code' => 200,
+                'message' => 'Horee notifikasi berhasil terkirim, Pantau terus yah antrianmu.',
+            ];
+            
+            return $this->respondCreated($response);
+        } else {
+            $response = [
+                'status' => true,
+                'code' => 200,
+                'message' => 'Ooppss notifikasi kamu gagal terkirim, Terjadi masalah pada notifikasi.',
+            ];
+            
+            return $this->respondCreated($response);
+        }
     }
 
 

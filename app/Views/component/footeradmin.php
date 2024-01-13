@@ -168,20 +168,20 @@ new Chart(ctx1, {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "<?= base_url('cancel-antrian/'); ?>" + idAntrian,
-                            type: "PUT",
+                            url: "<?= base_url('reminder-antrian/'); ?>" + idAntrian,
+                            type: "POST",
                             dataType: "JSON",
                             success: function(response) {
                                 if (response.status) {
                                     Swal.fire(
-                                        'Antrian Di Cancel!',
-                                        'Antrian sudah berhasil dicancel.',
+                                        'Antrian Di Ingatkan!',
+                                        'Antrian sudah berhasil diingatkan.',
                                         'success'
                                     )
                                 } else {
                                     Swal.fire(
                                         'Informasi!',
-                                        'Antrian gagal dicancel.',
+                                        'Antrian gagal diingatkan.',
                                         'warning'
                                     )
                                 }
@@ -189,7 +189,7 @@ new Chart(ctx1, {
                             error: function() {
                                 Swal.fire(
                                     'Informasi!',
-                                    'Antrian gagal dicancel.',
+                                    'Antrian gagal diingatkan.',
                                     'warning'
                                 )
                             }

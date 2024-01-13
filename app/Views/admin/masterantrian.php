@@ -122,7 +122,6 @@
                                         }
                                     ?>
                                     <tr>
-                                        <input class="form-control" type="text" id="id_antrian" value="<?= $row->id; ?>" hidden>
                                         <td>
                                             <div class="d-flex px-2 py-1">
                                                 <div>
@@ -151,14 +150,15 @@
                                             <span class="text-secondary text-xs font-weight-bold"><?= $row->tgl_pesanan; ?></span>
                                         </td>
                                         <?php  if ($row->status_antrian == "Menunggu") { ?>
+                                        <input class="form-control" type="text" id="id_antrian" value="<?= $row->id; ?>" hidden>
                                         <td class="align-middle text-center">
-                                            <a id="verifikasi-click" value="<?= $row->id; ?>" class="btn btn-success">
+                                            <a id="verifikasi-click" value="<?= $row->id; ?>" id="verifikasi_antrian" class="btn btn-success">
                                                 Verifikasi
                                             </a>
-                                            <a id="reminder-click" value="<?= $row->id_user; ?>" class="btn btn-info">
+                                            <a id="reminder-click" value="<?= $row->id_user; ?>" id="reminder_antrian" class="btn btn-info">
                                                 Ingatkan
                                             </a>
-                                            <a id="cancel-click" value="<?= $row->id; ?>" class="btn btn-danger">
+                                            <a id="cancel-click" value="<?= $row->id; ?>" id="cancel_antrian" class="btn btn-danger">
                                                 Batal
                                             </a>
                                         </td>
