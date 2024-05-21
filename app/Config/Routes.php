@@ -33,7 +33,7 @@ $routes->set404Override();
 
 
 // Route Rest API
-$routes->post('login', 'LoginController::signin');
+$routes->post('login-mobile', 'LoginController::signin');
 $routes->post('register', 'UserController::create');
 $routes->post('check-user', 'UserController::search');
 

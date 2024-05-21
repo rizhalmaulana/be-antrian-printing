@@ -188,6 +188,12 @@ class AntrianController extends ResourceController
         $to_time_book   = strtotime($request_jam_book);
         $to_time_end    = strtotime($request_jam_selesai); 
 
+        // print_r($time_now);
+        // print_r("\n");
+        // print_r($from_time);
+        // print_r("\n");
+        // print_r($to_time_book);
+
         $diff_book  = ($to_time_book - $from_time) / 60;
         $diff_end   = ($to_time_end - $to_time_book) / 60;
         
@@ -235,24 +241,6 @@ class AntrianController extends ResourceController
                             'status' => false,
                             'code' => 400,
                             'message' => 'Minimal booking antrian 30 menit dari waktu saat ini.'
-                        ];
-                        
-                        return $this->respond($response, 200);
-                        
-                    } else if ($diff_book > 120) { // Compare waktu booking kurang dari 60 menit
-                        $response = [
-                            'status' => false,
-                            'code' => 400,
-                            'message' => 'Maksimal booking antrian 120 menit dari waktu saat ini.'
-                        ];
-                        
-                        return $this->respond($response, 200);
-                        
-                    } else if ($diff_end >= 120) {
-                        $response = [
-                            'status' => false,
-                            'code' => 400,
-                            'message' => 'Maksimal booking antrian yaitu 2 jam pelayanan dari waktu saat ini.'
                         ];
                         
                         return $this->respond($response, 200);
@@ -370,32 +358,25 @@ class AntrianController extends ResourceController
             return $this->failValidationErrors($response);
         }
         
-        $difference = $this->differenceInHours($time_now, $request_jam_book);
-        $round_difference = round($difference, 0, PHP_ROUND_HALF_UP);
+        $kalkulasiWaktuSaatInidanJamBooking = $this->differenceInHours($time_now, $request_jam_book);
+        $roundingKalkulasiWaktu = round($kalkulasiWaktuSaatInidanJamBooking, 0, PHP_ROUND_HALF_UP);
 
-        if ($round_difference == 1) {
-            $arr_time = 1800000;
+        if ($roundingKalkulasiWaktu <= 1) {
+            $hasilWaktuSchedule = 60; // 60 Menit
 
-        } else if ($round_difference == 2) {
-            $arr_time = 3600000;
-
-        } else if ($round_difference < 1) {
-            $response = [
-                'status' => false,
-                'code' => 400,
-                'message' => 'Minimal booking antrian yaitu 30 menit pelayanan dari waktu saat ini.'
-            ];
-            
-            return $this->respond($response, 200);
-        } else if ($round_difference > 2) {
-            $response = [
-                'status' => false,
-                'code' => 400,
-                'message' => 'Maksimal booking antrian yaitu 2 jam pelayanan dari waktu saat ini.'
-            ];
-            
-            return $this->respond($response, 200);
+        } else if ($roundingKalkulasiWaktu > 1) {
+            $hasilWaktuSchedule = 60 * $roundingKalkulasiWaktu;
         }
+
+        // Pembuatan schedule waktu untuk notifikasi
+        $adjustTimeSchedule = $this->addingScheduleTime($hasilWaktuSchedule);
+
+        // print_r($roundingKalkulasiWaktu);
+        // print_r("\n");
+        // print_r($request_jam_book);
+        // print_r("\n");
+        // print_r($adjustTimeSchedule);
+        // die; 
 
         $result = $this->model->insert([
             'id_user'       => esc($request_id),
@@ -412,28 +393,17 @@ class AntrianController extends ResourceController
         $insert_id = $db->insertID();
 
         if ($result) {
-
-            $adjustTimeSchedule = $this->addingScheduleTime($request_jam_book, $arr_time);
-
             $result_flagging = $builder_flagging->insert([
                 'id_antrian'        => esc($insert_id),
-                'total_jam_booking' => esc($difference),            // 1 - 2 Jam
+                'total_jam_booking' => esc($kalkulasiWaktuSaatInidanJamBooking),            // 1 - 2 Jam
                 'jam_reminder'      => esc($adjustTimeSchedule),    // 14:30
-                'time_schedule'     => esc($arr_time),              // 30 Menit
+                'time_schedule'     => esc($hasilWaktuSchedule),              // 30 Menit
                 'status_flagging'   => esc(1)
             ]);
 
             if ($result_flagging) {
-                $divideTime = ($arr_time/1000);
-
-                if (($divideTime == 3600)) {
-                    $messageTime = ($divideTime/3600);
-                    $result_push = $this->send_push_notification("Notifikasi Antrian", "Kamu punya waktu ". $messageTime ." Jam untuk konfirmasi, Pantau terus antrian kamu disini.");
-
-                } else {
-                    $messageTime = ($divideTime%3600) / 60;
-                    $result_push = $this->send_push_notification("Notifikasi Antrian", "Kamu punya waktu ". $messageTime ." Menit untuk konfirmasi, Pantau terus antrian kamu disini.");
-                }
+                $pembagianWaktu = ($hasilWaktuSchedule/60);
+                $result_push = $this->send_push_notification("Notifikasi Antrian", "Kamu punya waktu ". $pembagianWaktu ." Jam untuk konfirmasi, Pantau terus antrian kamu disini.");
 
                 if ($result_push != null) {
                     $response = [
@@ -477,14 +447,17 @@ class AntrianController extends ResourceController
         $starttimestamp = strtotime($startdate);
         $endtimestamp = strtotime($enddate);
 
-        $difference = abs($endtimestamp - $starttimestamp) / 3600;
+        $kalkulasiWaktuSaatInidanJamBooking = abs($endtimestamp - $starttimestamp) / 3600;
 
-        return $difference;
+        return $kalkulasiWaktuSaatInidanJamBooking;
     }
 
-    function addingScheduleTime($requestBook, $timeSchedule) {
-        $newData = date("H:i:s", strtotime($requestBook. ' +'. $timeSchedule .' minutes'));
-        return $newData;
+    function addingScheduleTime($timeSchedule) {
+        $waktuSaatIni = time();
+        $totalWaktuBookdanSchedule = $waktuSaatIni + ($timeSchedule * 60);
+
+        $hasilWaktuSchedule = date("H:i:s", $totalWaktuBookdanSchedule);
+        return $hasilWaktuSchedule;
     }
 
     // For Mthod in android
@@ -492,20 +465,6 @@ class AntrianController extends ResourceController
         $title = $this->request->getVar('title');
         $message = $this->request->getVar('message');
         
-        helper(['form']);
-        $rules = $this->validate([
-            'title' => 'required|max_length[50]',
-            'message' => 'required|max_length[150]',
-        ]);
-        
-        if (!$rules) {
-            $response = [
-                'message' => $this->validator->getErrors()
-            ];
-            
-            return $this->failValidationErrors($response);
-        }
-
         $deviceToken = 'dmgW7KUsRvutBOF6w2CzD0:APA91bGSWjLdJ1xhqfk23Vv36gyOD06SIaXf7LUs1KitlD2RzAYscP9UISUQ137GGd6RNrRl7NHmbZLwUsPqnz2N-CuvLz08xyWywbw82J0MAMMH_mOzkN2lZUnrh11dZoafxkSE6UNS';
         $authorizationKey = 'AAAAkhtk95E:APA91bEUyQ9pj_fYdXy_FsWO8QN6weFZB78SKWDlC3EF4mtO1qCWPl6Ol7A8gZOrHrhva_7DMsPssgXI7k2aFgLGzpfUhYJ3z9MP-axkYXA3I82LYtq_lHydsUYvOhQuuqyvoAoT5rkt';
 
@@ -720,7 +679,6 @@ class AntrianController extends ResourceController
             return $this->respondCreated($response);
         }
     }
-
 
     /**
     * Return a new resource object, with default properties

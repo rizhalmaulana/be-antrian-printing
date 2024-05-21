@@ -104,35 +104,57 @@ class UserController extends ResourceController
         date_default_timezone_set('Asia/Jakarta');
         $date_now = date('Y-m-d H:i:s');
 
-        helper(['form']);
-        $rules = $this->validate([
-            'username'      => 'required|min_length[5]|max_length[10]',
-            'nama_lengkap'  => 'required|max_length[35]',
-            'password'      => 'required|min_length[8]',
-            'conf_password' => 'matches[password]',
-            'phone_user'    => 'required|is_unique[user.phone_user]|numeric|min_length[10]|max_length[13]',
-            'email_user'    => 'required|valid_email|is_unique[user.email_user]',
-        ]);
-
-        if (!$rules) {
+        $username = esc($this->request->getVar('username'));
+        $nama_lengkap = esc($this->request->getVar('nama_lengkap'));
+        $alamat = esc($this->request->getVar('alamat'));
+        $gender = esc($this->request->getVar('jenis_kelamin'));
+        $tempat_lahir = esc($this->request->getVar('tempat_lahir'));
+        $tgl_lahir = esc($this->request->getVar('tanggal_lahir'));
+        $password = password_hash($this->request->getVar('password'), PASSWORD_BCRYPT);
+        $phone = esc($this->request->getVar('phone_user'));
+        $email = esc($this->request->getVar('email_user'));
+        
+        if (strlen($phone) < 10) {
             $response = [
-                'message' => $this->validator->getErrors()
+                'status' => false,
+                'code' => 400,
+                'message' => 'Nomor hanphone kurang dari 10 digit.',
             ];
+    
+            return $this->respondCreated($response);
+        }
 
-            return $this->failValidationErrors($response);
+        if (strlen($password) < 8) {
+            $response = [
+                'status' => false,
+                'code' => 400,
+                'message' => 'Minimal password memiliki 8 kata.',
+            ];
+    
+            return $this->respondCreated($response);
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response = [
+                'status' => false,
+                'code' => 400,
+                'message' => 'Email yang anda masukkan tidak valid.',
+            ];
+    
+            return $this->respondCreated($response);
         }
 
         $this->model->insert([
-            'username'      => esc($this->request->getVar('username')),
-            'nama_lengkap'  => esc($this->request->getVar('nama_lengkap')),
-            'alamat'        => esc($this->request->getVar('alamat')),
-            'jenis_kelamin' => esc($this->request->getVar('jenis_kelamin')),
-            'tempat_lahir'  => esc($this->request->getVar('tempat_lahir')),
-            'tanggal_lahir' => $this->request->getVar('tanggal_lahir'),
-            'password'      => password_hash($this->request->getVar('password'), PASSWORD_BCRYPT),
+            'username'      => $username,
+            'nama_lengkap'  => $nama_lengkap,
+            'alamat'        => $alamat,
+            'jenis_kelamin' => $gender,
+            'tempat_lahir'  => $tempat_lahir,
+            'tanggal_lahir' => $tgl_lahir,
+            'password'      => $password,
             'status'        => 1,
-            'phone_user'    => esc($this->request->getVar('phone_user')),
-            'email_user'    => esc($this->request->getVar('email_user')),
+            'phone_user'    => $phone,
+            'email_user'    => $email,
             'created_at'    => $date_now,
             'updated_at'    => $date_now,
         ]);
